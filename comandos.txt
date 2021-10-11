@@ -1,0 +1,2 @@
+py manage.py startapp web
+py manage.py runserver 8000
