@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 
-
+##YA NO SALEXD 
 app = Flask(__name__)
 CORS(app)
 
@@ -16,6 +16,15 @@ def rutaInicial():
 def rutaPost():
     objeto = {"Mensaje":"Prueba en flask"}
     return(jsonify(objeto))
+
+
+
+
+
+
+
+
+
 
 #--------------rutas especificas----------------
 
