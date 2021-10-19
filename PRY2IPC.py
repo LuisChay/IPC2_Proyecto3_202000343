@@ -18,27 +18,33 @@ def rutaInicial():
 def rutaPost():
     objeto = {"Mensaje":"Prueba en flask"}
     return(jsonify(objeto))
-
-
-
-
-
-
-
-
-
-
 #--------------rutas especificas----------------
 
 @app.route('/facturas', methods=['POST'])
 def cargafacturas():
-    return("<h1>Consulta de datos</h1>")
 
 
+
+    return jsonify({'Mensaje':'Se agrego el paciente exitosamente',})
+
+@app.route('/facturas', methods=['GET'])
+def cargafacturas():
+
+
+
+    return jsonify({'Mensaje':'Se agrego el paciente exitosamente',})
 
 @app.route('/consultadatos', methods=['GET'])
 def consultadedatos():
-    return("<h1>Consulta de datos</h1>")
+
+
+
+        return(jsonify(objeto))
+
+    salida = { "Mensaje": "No existe el paciente con ese nombre"}
+
+    return(jsonify(salida))
+
 
 @app.route('/resumeniva', methods=['GET'])
 def resumendeiva():
