@@ -1,9 +1,11 @@
 from flask import Flask, jsonify, request
 
 from flask_cors import CORS
+from Facturas import facturas
 
 
-##YA NO SALEXD 
+facturasArr = []
+
 app = Flask(__name__)
 CORS(app)
 
@@ -27,6 +29,12 @@ def rutaPost():
 
 
 #--------------rutas especificas----------------
+
+@app.route('/facturas', methods=['POST'])
+def cargafacturas():
+    return("<h1>Consulta de datos</h1>")
+
+
 
 @app.route('/consultadatos', methods=['GET'])
 def consultadedatos():
