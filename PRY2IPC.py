@@ -25,7 +25,6 @@ def cargafacturas():
 
     global facturasArr
 
-    response = requests.get(url)
 
 
     xmlentrada = ET.parse(archivoinput)
