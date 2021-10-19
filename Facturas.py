@@ -19,7 +19,7 @@ class Facturas:
     def getReferencia(self):
         return self.referencia
 
-    def getReferencia(self):
+    def getNitemisor(self):
         return self.nitemisor
 
     def getNitreceptor(self):
