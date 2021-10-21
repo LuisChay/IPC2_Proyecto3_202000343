@@ -8,7 +8,7 @@ class Facturas:
         self.nitemisor = nitemisor
         self.nitreceptor = nitreceptor
         self.valor = valor
-        self.iva = costointernado
+        self.iva = iva
         self.total = total
 
     # METODOS GET

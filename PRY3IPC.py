@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 import xml.etree.ElementTree as ET
+from dict2xml import dict2xml
 
 from flask_cors import CORS
 from Facturas import Facturas
@@ -20,17 +21,16 @@ def rutaPost():
     objeto = {"Mensaje":"Prueba en flask"}
     return(jsonify(objeto))
 #--------------rutas especificas----------------
-@app.route('/facturas', methods=['POST'])
+@app.route('/Facturas', methods=['POST'])
 def cargafacturas():
 
     global facturasArr
 
+    entrada = request.data.decode('utf-8')
 
+    xmlentrada = ET.fromstring(entrada)
 
-    xmlentrada = ET.parse(archivoinput)
-    raizxml = xmlentrada.getroot()
-
-    for dte in raizxml.find('DTE'):
+    for dte in xmlentrada.findall('DTE'):
         tiempo = dte.find('TIEMPO').text
         referencia = dte.find('REFERENCIA').text
         nitemi = dte.find('NIT_EMISOR').text
@@ -38,7 +38,7 @@ def cargafacturas():
         valor = dte.find('VALOR').text
         iva = dte.find('IVA').text
         total = dte.find('TOTAL').text
-        nuevo = Facturas(tiempo,referencia,nitemi,nitrec,valor,iva,total)
+    nuevo = Facturas(tiempo,referencia,nitemi,nitrec,valor,iva,total)
 
     facturasArr.append(nuevo)
 
@@ -51,23 +51,57 @@ def getFacturas():
 
     global facturasArr
 
-    Datos = []
+    contador_facturasrecibidas = 0
+    contador_nitemimalo = 0
+    contador_nitrecmalo = 0
+    contador_ivamalo = 0
+    contador_totalmalo = 0
+    contador_refdoble = 0
+    contador_factbuenas = 0
+    contador_nitemisores = 0
+    contador_nitreceptores = 0
 
+    #Datos = []
+    print(facturasArr)
     for factura in facturasArr:
+        print(factura)
+        contador_facturasrecibidas += 1
 
-        objeto = {
-            'Tiempo': factura.getTiempo(),
-            'Referencia': factura.getReferencia(),
-            'NitEmisor': factura.getNitemisor(),
-            'NitReceptor': factura.getNitreceptor(),
-            'Valor': factura.getValor(),
-            'IVA': factura.getIva(),
-            'Total': factura.getTotal(),
+        contador_nitemisores = int(len(factura.getNitemisor()))
+        contador_nitreceptores = int(len(factura.getNitreceptor()))
+
+        if len(factura.getReferencia()) == len(set(factura.getReferencia())):
+            contador_refdoble += 1
+        else:
+            contador_refdoble == 0
+
+        if len(factura.getNitemisor()) == len(set(factura.getNitemisor())):
+            contador_nitemisores += 1
+        else:
+            contador_nitemisores += 1
+
+        if len(factura.getNitreceptor()) == len(set(factura.getNitreceptor())):
+            contador_nitreceptores += 1
+        else:
+            contador_nitreceptores += 1
+
+        if (float(factura.getTotal()) - (float(factura.getTotal()) * 0.88)) == factura.getIva():
+            contador_ivamalo += 1
+        else:
+            contador_ivamalo += 0
+
+    objeto = {
+            'Facturas recibidas': contador_facturasrecibidas,
+            'Referencia doble':contador_refdoble,
+            'NitEmisor': contador_nitemisores,
+            'NitReceptor': contador_nitreceptores,
+            'IVA malo' : contador_ivamalo
         }
 
-        Datos.append(objeto)
 
-    return(jsonify(Datos))
+    #Datos.append(objeto)
+    xmlsalida = dict2xml(objeto)
+    return(xmlsalida)
 
 
 # METODO - OBTENER UN DATO PACIENTE ESPECIFICO
