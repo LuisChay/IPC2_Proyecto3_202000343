@@ -42,6 +42,7 @@ def cargafacturas():
 
     facturasArr.append(nuevo)
 
+    print(facturasArr)
 
     return jsonify({'Mensaje':'Se agregaron las facturas exitosamente',})
 
