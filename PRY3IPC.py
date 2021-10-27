@@ -41,29 +41,10 @@ def cargafacturas():
         valor = dte.find('VALOR').text
         iva = dte.find('IVA').text
         total = dte.find('TOTAL').text
-        nuevo = Facturas(tiempo,referencia,nitemi,nitrec,valor,iva,total)
+        nuevo = Facturas(tiempo,referencia,nitemi,nitrec,valor,iva,total, False)
 
         facturasArr.append(nuevo)
-    '''
-    entrada = request.data.decode('utf-8')
 
-    xmlentrada = ET.fromstring(entrada)
-
-    entry = request.form['formData']
-
-    xmlentry = ET.fromstring(entry)
-
-
-    for dte in xmlentrada.findall('DTE'):
-        tiempo = dte.find('TIEMPO').text
-        referencia = dte.find('REFERENCIA').text
-        nitemi = dte.find('NIT_EMISOR').text
-        nitrec = dte.find('NIT_RECEPTOR').text
-        valor = dte.find('VALOR').text
-        iva = dte.find('IVA').text
-        total = dte.find('TOTAL').text
-    nuevo = Facturas(tiempo,referencia,nitemi,nitrec,valor,iva,total)
-    '''
 
     return jsonify({'Mensaje':'Se agregaron las facturas exitosamente',})
 
@@ -82,48 +63,154 @@ def getFacturas():
     contador_factbuenas = 0
     contador_nitemisores = 0
     contador_nitreceptores = 0
+    contador_facturasmalas = 0
 
     #Datos = []
 
     for factura in facturasArr:
 
+        #IVA EMISOR MALO
         contador_facturasrecibidas += 1
+        auxMulti = []
+        nit_emisor = factura.getNitemisor()
+        nit_emisor = nit_emisor.replace(' ', '')
+        posicion = len(nit_emisor)
+
+        for x in range(len(nit_emisor) - 1):
+            auxMulti.append(posicion * int(nit_emisor[x]))
+            posicion = posicion - 1
+
+        sumas = 0
+        for y in auxMulti:
+            sumas += y
+
+        modulo11 = sumas % 11
+
+        resta = 11 - modulo11
+
+        final = resta % 11
+
+        if final == 10:
+            if nit_emisor[-1].lower() != "k":
+                contador_nitemimalo += 1
+                factura.setEstadoMalo(True)
+
+        elif nit_emisor[-1] != str(final):
+
+            contador_nitemimalo += 1
+            factura.setEstadoMalo(True)
+    #IVA NitReceptor MALO
+    contador_facturasrecibidas += 1
+    auxMulti1 = []
+    nit_receptor = factura.getNitreceptor()
+    nit_receptor = nit_receptor.replace(' ', '')
+    posicion1 = len(nit_receptor)
+
+    for x in range(len(nit_receptor) - 1):
+        auxMulti1.append(posicion1 * int(nit_receptor[x]))
+        posicion1 = posicion1 - 1
+
+    sumas1 = 0
+    for y in auxMulti1:
+        sumas1 += y
+
+    modulo111 = sumas1 % 11
+
+    resta1 = 11 - modulo111
+
+    final1 = resta1 % 11
+
+    if final1 == 10:
+        if nit_receptor[-1].lower() != "k":
+            contador_nitrecmalo += 1
+            factura.setEstadoMalo(True)
+
+    elif nit_receptor[-1] != str(final1):
+        contador_nitrecmalo += 1
+        factura.setEstadoMalo(True)
+
+    # referencias DOBLES
+    referencias = []
+    for factura in facturasArr:
+        referencias.append(factura.getReferencia())
+
+    repetidos = []
+
+    for ref in referencias:
+        if referencias.count(ref) >= 2:
+            c = 0
+            for rep in repetidos:
+                if rep == ref:
+                    c += 1
+            if c == 0:
+                repetidos.append(ref)
+
+    contador_refdoble += len(repetidos)
+
+    for y in repetidos:
+        for factura  in facturasArr:
+            if factura.getReferencia() == y:
+                factura.setEstadoMalo(True)
+
+    # NIT EMISORES CONTADOR
+    '''
+    emisores = []
+    for factura in facturasArr:
+        if emisores.count(factura.getNitemisor()) = 0:
+            emisores.append(factura.getNitemisor())
+
+    for emi in emisores:
+        if referencias.count(ref) >= 2:
+        c = 0
+        for rep in repetidos1:
+            if rep == emi:
+                c += 1
+        if c == 0:
+            contador_nitemisores += 1
+            repetidos.append(emi)
+
+    contador_nitemisores += len(repetidos)
+    '''
+
+
+
+
 
         #contador_nitemisores = int(len(factura.getNitemisor()))
         #contador_nitreceptores = int(len(factura.getNitreceptor()))
 
-
-    arrrefe = []
     for factura in facturasArr:
 
-        #iIVA MALO
+        #IIVA MALO
         operacion = ( float(factura.getValor() ) - ( float(factura.getValor()) * 0.88 ) )
         ivax = float(factura.getIva())
         aprox = round(ivax, 2)
 
         if aprox != operacion:
-            contador_totalmalo += 1
+            factura.setEstadoMalo(True)
+            contador_ivamalo += 1
+            contador_facturasmalas += 1
+
 
         #total MALO
         operaciontotal = ( float(factura.getValor() ) + ( float(factura.getIva())) )
-        totalx = float(factura.getIva())
+        totalx = float(factura.getTotal())
         aprox1 = round(totalx, 2)
 
-        if factura.getTotal() != operaciontotal:
-            contador_ivamalo += 1
+        if aprox1 != operaciontotal:
+            factura.setEstadoMalo(True)
+            contador_totalmalo += 1
+            contador_facturasmalas += 1
 
 
-        '''
-        if len(factura.getNitemisor()) == len(set(factura.getNitemisor())):
-            contador_nitemisores += 1
-        else:
-            contador_nitemisores += 1
+    for factura in facturasArr:
+        if factura.getEstadoMalo() == False:
+            contador_factbuenas += 1
 
-        if len(factura.getNitreceptor()) == len(set(factura.getNitreceptor())):
-            contador_nitreceptores += 1
-        else:
-            contador_nitreceptores += 1
-        '''
+
+
+
+        #contador_factbuenas = contador_facturasrecibidas - contador_facturasmalas
 
 
     objeto = {
@@ -132,13 +219,17 @@ def getFacturas():
             'NitEmisor': contador_nitemisores,
             'NitReceptor': contador_nitreceptores,
             'IVA malo' : contador_ivamalo,
-            'Total malo' : contador_totalmalo
+            'Total malo' : contador_totalmalo,
+            'Emisor malo' : contador_nitemimalo,
+            'Facturas Buenas' : contador_factbuenas
         }
 
 
     #Datos.append(objeto)
     xmlsalida = dict2xml(objeto)
-    return (xmlsalida)
+
+    xml = "prueba"
+    return (xml)
 
 
 

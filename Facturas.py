@@ -2,7 +2,7 @@ class Facturas:
     # NUESTRO NUEVO CONSTRUCTO
     # __init__ sera nuestro metodo que se ejecuta al crear un objeto
     # self, hace referencia al objeto actual
-    def __init__(self,tiempo,referencia,nitemisor,nitreceptor,valor, iva,total):
+    def __init__(self,tiempo,referencia,nitemisor,nitreceptor,valor, iva, total, estadoMalo):
         self.tiempo = tiempo
         self.referencia = referencia
         self.nitemisor = nitemisor
@@ -10,6 +10,7 @@ class Facturas:
         self.valor = valor
         self.iva = iva
         self.total = total
+        self.estadoMalo  = estadoMalo
 
     # METODOS GET
     # Creamos nuestros metodos para obtener la informacion, usando self
@@ -34,6 +35,9 @@ class Facturas:
     def getTotal(self):
         return self.total
 
+    def getEstadoMalo(self):
+        return self.estadoMalo
+
     # METODOS SET
     # Creamos nuestros metodos para setear la informacion, usando el self y el parametro
     def setTiempo(self, tiempo):
@@ -56,3 +60,9 @@ class Facturas:
 
     def setTotal(self, total):
         self.total = total
+
+    def setTotal(self, total):
+        self.total = total
+
+    def setEstadoMalo(self, estadoMalo):
+        self.estadoMalo = estadoMalo
