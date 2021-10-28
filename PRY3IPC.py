@@ -68,9 +68,8 @@ def getFacturas():
     #Datos = []
 
     for factura in facturasArr:
-
-        #IVA EMISOR MALO
         contador_facturasrecibidas += 1
+        #IVA EMISOR MALO
         auxMulti = []
         nit_emisor = factura.getNitemisor()
         nit_emisor = nit_emisor.replace(' ', '')
@@ -94,11 +93,11 @@ def getFacturas():
             if nit_emisor[-1].lower() != "k":
                 contador_nitemimalo += 1
                 factura.setEstadoMalo(True)
-
         elif nit_emisor[-1] != str(final):
-
             contador_nitemimalo += 1
             factura.setEstadoMalo(True)
+
+
     #IVA NitReceptor MALO
     contador_facturasrecibidas += 1
     auxMulti1 = []
@@ -124,7 +123,6 @@ def getFacturas():
         if nit_receptor[-1].lower() != "k":
             contador_nitrecmalo += 1
             factura.setEstadoMalo(True)
-
     elif nit_receptor[-1] != str(final1):
         contador_nitrecmalo += 1
         factura.setEstadoMalo(True)
@@ -153,31 +151,22 @@ def getFacturas():
                 factura.setEstadoMalo(True)
 
     # NIT EMISORES CONTADOR
-    '''
+
     emisores = []
     for factura in facturasArr:
-        if emisores.count(factura.getNitemisor()) = 0:
+        if emisores.count(factura.getNitemisor()) == 0:
             emisores.append(factura.getNitemisor())
 
-    for emi in emisores:
-        if referencias.count(ref) >= 2:
-        c = 0
-        for rep in repetidos1:
-            if rep == emi:
-                c += 1
-        if c == 0:
-            contador_nitemisores += 1
-            repetidos.append(emi)
+    contador_nitemisores += len(emisores)
 
-    contador_nitemisores += len(repetidos)
-    '''
+    # NIT RECEPTOR CONTADOR
 
+    receptores = []
+    for factura in facturasArr:
+        if receptores.count(factura.getNitreceptor()) == 0:
+            receptores.append(factura.getNitreceptor())
 
-
-
-
-        #contador_nitemisores = int(len(factura.getNitemisor()))
-        #contador_nitreceptores = int(len(factura.getNitreceptor()))
+    contador_nitreceptores += len(receptores)
 
     for factura in facturasArr:
 
@@ -207,11 +196,41 @@ def getFacturas():
         if factura.getEstadoMalo() == False:
             contador_factbuenas += 1
 
-
-
-
+    contador_facturasrecibidasformat = "{}".format(contador_facturasrecibidas)
+    contador_nitemimaloformat = "{}".format(contador_nitemimalo)
+    contador_nitrecmaloformat = "{}".format(contador_nitrecmalo)
+    contador_ivamaloformat = "{}".format(contador_ivamalo)
+    contador_totalmaloformat = "{}".format(contador_totalmalo)
+    contador_refdobleformat = "{}".format(contador_refdoble)
+    contador_factbuenasformat = "{}".format(contador_factbuenas)
+    contador_nitemisoresformat = "{}".format(contador_nitemisores)
+    contador_nitreceptoresformat = "{}".format(contador_nitreceptores)
+    contador_facturasmalasformat = "{}".format(contador_facturasmalas)
         #contador_factbuenas = contador_facturasrecibidas - contador_facturasmalas
-
+    xml = """
+<LISTAAUTORIZACIONES>
+     <AUTORIZACION>
+        <FECHA> 01/09/2021 </FECHA>
+        <FACTURAS_RECIBIDAS> {contador_facturasrecibidasformat} </FACTURAS_RECIBIDAS>
+        <ERRORES>
+            <NIT_EMISOR> {contador_nitemimaloformat} </NIT_EMISOR>
+            <NIT_RECEPTOR> {contador_nitrecmaloformat} </NIT_RECEPTOR>
+            <IVA> {contador_ivamaloformat} </IVA>
+            <TOTAL> {contador_totalmaloformat} </TOTAL>
+            <REFERENCIA_DUPLICADA> {contador_refdobleformat} </REFERENCIA_DUPLICADA>
+        </ERRORES>
+        <FACTURAS_CORRECTAS> {contador_factbuenasformat} </FACTURAS_CORRECTAS>
+        <CANTIDAD_EMISORES> {contador_nitemisoresformat} </CANTIDAD_EMISORES>
+        <CANTIDAD_RECEPTORES> {contador_nitreceptoresformat} </CANTIDAD_RECEPTORES>
+        <LISTADO_AUTORIZACIONES>
+        <APROBACION>
+            <NIT_EMISOR ref=”A1990”> 7378106 </NIT_EMISOR>
+            <CODIGO_APROBACION> 2021090100000001 </CODIGO_APROBACION>
+        </APROBACION>
+        <TOTAL_APROBACIONES> {contador_factbuenasformat} </TOTAL_APROBACIONES>
+<AUTORIZACION>
+</LISTADO_AUTORIZACIONES>
+                """.format(**locals())
 
     objeto = {
             'Facturas recibidas': contador_facturasrecibidas,
@@ -227,8 +246,6 @@ def getFacturas():
 
     #Datos.append(objeto)
     xmlsalida = dict2xml(objeto)
-
-    xml = "prueba"
     return (xml)
 
 

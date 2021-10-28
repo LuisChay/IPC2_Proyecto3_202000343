@@ -4,6 +4,7 @@
     <!-- Required meta tags -->
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="../assets/vendor/daterangepicker/daterangepicker.css">
 
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,15 +51,25 @@
     }
     .botones{
       width: 180px;
-      height: 70px;
+      height: 150px;
       outline: dashed 1px black;
-      position: relative;
       padding: 1em;
       position: absolute;
       top: 50%;
       left: 50%;
       margin-right: -50%;
-      transform: translate(-50%, -50%)
+      transform: translate(-50%, -20%)
+    }
+    .fecha{
+      width: 230px;
+      height: 50px;
+      outline: dashed 1px black;
+      padding: 1em;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      margin-right: -50%;
+      transform: translate(-50%, -200%)
     }
 
     </style>
@@ -77,12 +88,24 @@
                 <h1>PROYECTO 3 // 202000343</h1>
                 <h1 class="texto1">RESUMEN 2</h1>
     </div>
+
+
+
     <div class="texto">
+
+      <input class="fecha" type="text" name="daterange" value="01/01/2018 - 01/15/2018" />
+
+
+
+
 
     </div>
     <div class="botones">
-        <a href="inicial/" style="width: 150px;" class="btn btn-primary">Regresar</a>
+      <a href="inicial/" style="width: 150px;" class="btn btn-primary">Cargar</a>
+      <a href="inicial/" style="width: 150px;" class="btn btn-primary">Regresar</a>
+      <a href="inicial/" style="width: 150px;" class="btn btn-primary">Exportar PDF</a>
     </div>
+
     <div class="form-group" align="Right">
 
     </div>
@@ -93,46 +116,7 @@
 
 
 <script>
-var archivo = document.getElementById("file");
-function xmlToJson(archivo) {
-
-    // Create the return object
-    var objeto = {};
-
-    if ( archivo.nodeType == 1 ) { // element
-      // do attributes
-      if ( archivo.attributes.length > 0 ) {
-      objeto["@attributes"] = {};
-        for ( var j = 0; j < archivo.attributes.length; j++ ) {
-          var attribute = archivo.attributes.item( j );
-          objeto["@attributes"][attribute.nodeName] = attribute.nodeValue;
-        }
-      }
-    } else if ( archivo.nodeType == 3 ) { // text
-      objeto = archivo.nodeValue;
-    }
-
-    // do children
-    if ( archivo.hasChildNodes() ) {
-      for( var i = 0; i < archivo.childNodes.length; i++ ) {
-        var item = archivo.childNodes.item(i);
-        var nodeName = item.nodeName;
-        if ( typeof(obj[nodeName] ) == "undefined" ) {
-          obj[nodeName] = xmlToJson( item );
-        } else {
-          if ( typeof( obj[nodeName].push ) == "undefined" ) {
-            var old = obj[nodeName];
-            obj[nodeName] = [];
-            obj[nodeName].push( old );
-          }
-          obj[nodeName].push( xmlToJson( item ) );
-        }
-      }
-    }
-    return objeto;
-  }
-
-    console.log(objeto);
+  console.log(objeto);
 
     fetch('localhost:3000/facturas', {
                 method: 'POST',
@@ -151,22 +135,25 @@ function xmlToJson(archivo) {
               alert(response.Mensaje)
             })
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 </script>
-
+<script src="../assets/vendor/daterangepicker/moment.min.js"></script>
+<script src="../assets/vendor/daterangepicker/daterangepicker.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<script>
+$(function() {
+  $('input[name="daterange"]').daterangepicker({
+    opens: 'left'
+  }, function(start, end, label) {
+    console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+  });
+});
+</script>
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>

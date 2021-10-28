@@ -12,3 +12,6 @@ def resumen1(request):
 
 def resumen2(request):
     return render(request, 'resumen2.html')
+
+def pdf(request):
+    return render(request, 'MANUAL DE USUARIO.pdf')
