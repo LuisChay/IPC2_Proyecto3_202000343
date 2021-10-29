@@ -35,13 +35,16 @@ def cargafacturas():
 
     for dte in xmlentrada.findall('DTE'):
         tiempo = dte.find('TIEMPO').text
+
+        regFecha = re.findall(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", tiempo)
+
         referencia = dte.find('REFERENCIA').text
         nitemi = dte.find('NIT_EMISOR').text
         nitrec = dte.find('NIT_RECEPTOR').text
         valor = dte.find('VALOR').text
         iva = dte.find('IVA').text
         total = dte.find('TOTAL').text
-        nuevo = Facturas(tiempo,referencia,nitemi,nitrec,valor,iva,total, False)
+        nuevo = Facturas(regFecha,referencia,nitemi,nitrec,valor,iva,total, False)
 
         facturasArr.append(nuevo)
 
@@ -73,21 +76,10 @@ def getFacturas():
     fechasREllena = []
 
     for factura in facturasArr:
+        contador_facturasrecibidas += 1
+        print(factura.getTiempo())
 
-        fechasREvacia.append(bytes(factura.getTiempo()))
-
-        print(fechasREvacia)
-        #patron = r'([0-9]{2}\/[0-9]{2}\/[0-9]{4})'
-        #regFecha = re.search(patron, fechasREvacia)
-
-        regFecha = re.findall(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", fechasREvacia)
-        fechasREllena.append(regFecha)
-        print(fechasREllena)
-
-
-
-
-
+        '''
         if factura.getTiempo() == tiempo1:
             contadorfecha += 1
             coni += 1
@@ -99,10 +91,8 @@ def getFacturas():
             coni += 1
             contadorfecha = 1
             tiempo1 = factura.getTiempo()
+        '''
 
-
-
-        contador_facturasrecibidas += 1
         #IVA EMISOR MALO
         auxMulti = []
         nit_emisor = factura.getNitemisor()
@@ -133,7 +123,6 @@ def getFacturas():
 
 
     #IVA NitReceptor MALO
-    contador_facturasrecibidas += 1
     auxMulti1 = []
     nit_receptor = factura.getNitreceptor()
     nit_receptor = nit_receptor.replace(' ', '')
