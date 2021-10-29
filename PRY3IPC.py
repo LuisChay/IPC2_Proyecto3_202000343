@@ -4,7 +4,7 @@ from dict2xml import dict2xml
 import collections
 from flask_cors import CORS
 from Facturas import Facturas
-from iteration_utilities import duplicates
+import re
 
 
 
@@ -52,6 +52,7 @@ def cargafacturas():
 @app.route('/Facturas', methods=['GET'])
 def getFacturas():
 
+
     global facturasArr
 
     contador_facturasrecibidas = 0
@@ -64,10 +65,43 @@ def getFacturas():
     contador_nitemisores = 0
     contador_nitreceptores = 0
     contador_facturasmalas = 0
+    tiempo1 = ""
+    contadorfecha = 1
+    coni =  0
 
-    #Datos = []
+    fechasREvacia = []
+    fechasREllena = []
 
     for factura in facturasArr:
+
+        fechasREvacia.append(bytes(factura.getTiempo()))
+
+        print(fechasREvacia)
+        #patron = r'([0-9]{2}\/[0-9]{2}\/[0-9]{4})'
+        #regFecha = re.search(patron, fechasREvacia)
+
+        regFecha = re.findall(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", fechasREvacia)
+        fechasREllena.append(regFecha)
+        print(fechasREllena)
+
+
+
+
+
+        if factura.getTiempo() == tiempo1:
+            contadorfecha += 1
+            coni += 1
+            tiempo1 = factura.getTiempo()
+            print("contador ")
+            print(contadorfecha)
+            print(tiempo1)
+        else:
+            coni += 1
+            contadorfecha = 1
+            tiempo1 = factura.getTiempo()
+
+
+
         contador_facturasrecibidas += 1
         #IVA EMISOR MALO
         auxMulti = []
@@ -207,6 +241,10 @@ def getFacturas():
     contador_nitreceptoresformat = "{}".format(contador_nitreceptores)
     contador_facturasmalasformat = "{}".format(contador_facturasmalas)
         #contador_factbuenas = contador_facturasrecibidas - contador_facturasmalas
+
+
+
+
     xml = """
 <LISTAAUTORIZACIONES>
      <AUTORIZACION>
@@ -278,9 +316,6 @@ def ObtenerPacientes(nombrepac):
 @app.route('/consultadatos', methods=['GET'])
 def consultadedatos():
     return("<h1>Consulta de datos</h1>")
-
-
-
 
 
 
