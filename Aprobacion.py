@@ -1,15 +1,25 @@
-class Facturas:
-
+class Aprobacion:
     def __init__(self,tiempo,referencia,nitemisor,nitreceptor,valor, iva, total, estadoMalo):
-        self.tiempo = tiempo
-        self.referencia = referencia
-        self.nitemisor = nitemisor
+        self.contador_facturasrecibidas = 0
+        self.contador_nitemimalo = 0
+        self.contador_nitrecmalo = 0
+        self.contador_ivamalo = 0
+        self.contador_totalmalo = 0
+        self.contador_refdoble = 0
+        self.contador_factbuenas = 0
+        self.contador_nitemisores = 0
+        self.contador_nitreceptores = 0
+        self.contador_facturasmalas = 0
+
+        self.fecha = fecha
+        self.correcta = correcta
+        self.listaaprobaciones = listaaprobaciones
+
         self.nitreceptor = nitreceptor
         self.valor = valor
         self.iva = iva
         self.total = total
         self.estadoMalo  = estadoMalo
-
 
     def getTiempo(self):
         return self.tiempo
@@ -35,7 +45,7 @@ class Facturas:
     def getEstadoMalo(self):
         return self.estadoMalo
 
-    # METODOS SET
+
     def setTiempo(self, tiempo):
         self.tiempo = tiempo
 
