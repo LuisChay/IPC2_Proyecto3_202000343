@@ -35,7 +35,6 @@ def cargafacturas():
 
     for dte in xmlentrada.findall('DTE'):
         tiempo = dte.find('TIEMPO').text
-
         regFecha = re.findall(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", tiempo)
 
         referencia = dte.find('REFERENCIA').text
