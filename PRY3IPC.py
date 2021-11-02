@@ -9,6 +9,8 @@ import re
 
 
 facturasArr = []
+fecharesumen1 = []
+fecharesumen2 = []
 
 app = Flask(__name__)
 CORS(app)
@@ -72,11 +74,9 @@ def getFacturas():
     contadorfecha = 1
     coni =  0
 
-    fechasREvacia = []
-    fechasREllena = []
+    listamalas = []
 
     for factura in facturasArr:
-
 
 
         contador_facturasrecibidas += 1
@@ -222,6 +222,7 @@ def getFacturas():
         if factura.getEstadoMalo() == False:
             contador_factbuenas += 1
 
+
     contador_facturasrecibidasformat = "{}".format(contador_facturasrecibidas)
     contador_nitemimaloformat = "{}".format(contador_nitemimalo)
     contador_nitrecmaloformat = "{}".format(contador_nitrecmalo)
@@ -233,8 +234,6 @@ def getFacturas():
     contador_nitreceptoresformat = "{}".format(contador_nitreceptores)
     contador_facturasmalasformat = "{}".format(contador_facturasmalas)
     #contador_factbuenas = contador_facturasrecibidas - contador_facturasmalas
-
-
 
 
     xml = """
@@ -280,13 +279,87 @@ def getFacturas():
 
 
 
+@app.route('/resumeniva', methods=['POST'])
+def resumendeivaPost():
+    global fecharesumen1
+
+    fechapost = request.json['Fecha']
+    fecharesumen1.append(fechapost)
+
+
+    return jsonify({'Mensaje':'Se esta generando el resumen',})
+
+
 @app.route('/resumeniva', methods=['GET'])
-def resumendeiva():
-    return("<h1>Resumen de IVA</h1>")
+def resumendeivaGet():
+    global facturasArr
+    global fecharesumen1
+
+
+    fechaanalisis1 = ""
+
+    for fecha in fecharesumen1:
+        fechapass = fecha
+
+    for factura in facturasArr:
+        if fechapass == factura.getTiempo():
+            objeto = {
+            'Total': factura.getTotal()
+
+            }
+
+            return(jsonify(objeto))
+
+    salida = { "Mensaje": "No existe registros en esa fecha" }
+
+    return(jsonify(salida))
+
+
+
+@app.route('/resumenrango', methods=['POST'])
+def resumenderangoPost():
+
+    global fecharesumen2
+
+    fechapost1 = request.json['Fecha']
+
+    fecharesumen2.append(fechapost1)
+
+
+    return jsonify({'Mensaje':'Se esta generando el resumen',})
+
+
+
 
 @app.route('/resumenrango', methods=['GET'])
-def resumenderango():
-    return("<h1>Resumen de rango</h1>")
+def resumenderangoGet():
+    fechaanalisis1 = ""
+
+    for fecha in fecharesumen2:
+        fechapass1 = fecha
+
+        for factura in facturasArr:
+            print(fechapass1)
+
+            fechaanalisis1 += str(factura.getTiempo())
+
+            regFecha = re.search(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", fechaanalisis1)
+
+            print("regex")
+            print(regFecha)
+
+            if fechapass1 == regFecha:
+                objeto = {
+                'Total': factura.getTotal(),
+                'Valor': factura.getValor(),
+                'Fecha': factura.getTiempo()
+                }
+
+                return(jsonify(objeto))
+
+    salida = { "Mensaje": "No existe registros en esa fecha" }
+
+    return(jsonify(salida))
 
 
 if __name__ == "__main__":
