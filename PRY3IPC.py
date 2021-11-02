@@ -43,6 +43,7 @@ def cargafacturas():
         valor = dte.find('VALOR').text
         iva = dte.find('IVA').text
         total = dte.find('TOTAL').text
+
         nuevo = Facturas(regFecha,referencia,nitemi,nitrec,valor,iva,total, False)
 
         facturasArr.append(nuevo)
@@ -75,6 +76,9 @@ def getFacturas():
     fechasREllena = []
 
     for factura in facturasArr:
+
+
+
         contador_facturasrecibidas += 1
         print(factura.getTiempo())
 
@@ -228,7 +232,7 @@ def getFacturas():
     contador_nitemisoresformat = "{}".format(contador_nitemisores)
     contador_nitreceptoresformat = "{}".format(contador_nitreceptores)
     contador_facturasmalasformat = "{}".format(contador_facturasmalas)
-        #contador_factbuenas = contador_facturasrecibidas - contador_facturasmalas
+    #contador_factbuenas = contador_facturasrecibidas - contador_facturasmalas
 
 
 
@@ -276,37 +280,6 @@ def getFacturas():
 
 
 
-# METODO - OBTENER UN DATO PACIENTE ESPECIFICO
-@app.route('/Pacientes/<string:nombrepac>', methods=['GET'])
-def ObtenerPacientes(nombrepac):
-
-    global PacientesArr
-
-    for paciente in PacientesArr:
-
-        if paciente.getUsuariopac() == nombrepac:
-            objeto = {
-            'Nombre': paciente.getNombrepac(),
-            'Apellido': paciente.getApellidopac(),
-            'Fecha': paciente.getFechapac(),
-            'Sexo': paciente.getSexopac(),
-            'Usuario': paciente.getUsuariopac(),
-            'Contrasena': paciente.getContrapac(),
-            'Telefono': paciente.getTelefonopac(),
-            }
-
-            return(jsonify(objeto))
-
-    salida = { "Mensaje": "No existe el paciente con ese nombre"}
-
-    return(jsonify(salida))
-
-@app.route('/consultadatos', methods=['GET'])
-def consultadedatos():
-    return("<h1>Consulta de datos</h1>")
-
-
-
 @app.route('/resumeniva', methods=['GET'])
 def resumendeiva():
     return("<h1>Resumen de IVA</h1>")
@@ -315,13 +288,6 @@ def resumendeiva():
 def resumenderango():
     return("<h1>Resumen de rango</h1>")
 
-@app.route('/grafica', methods=['GET'])
-def graficas():
-    return("<h1>Grafica</h1>")
-
-@app.route('/procesar', methods=['POST'])
-def procesamiento():
-    return("<h1>Procesar</h1>")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
