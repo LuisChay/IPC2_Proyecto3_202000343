@@ -9,10 +9,15 @@ class Facturas:
         self.iva = iva
         self.total = total
         self.estadoMalo  = estadoMalo
+        self.listaerrores = []
+
 
 
     def getTiempo(self):
         return self.tiempo
+
+    def getLista(self):
+        return self.listaerrores
 
     def getReferencia(self):
         return self.referencia
@@ -62,3 +67,6 @@ class Facturas:
 
     def setEstadoMalo(self, estadoMalo):
         self.estadoMalo = estadoMalo
+
+    def setListaerrores(self, cadena):
+        self.listaerrores.append(cadena)

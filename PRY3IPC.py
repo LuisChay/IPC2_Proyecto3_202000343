@@ -4,11 +4,13 @@ from dict2xml import dict2xml
 import collections
 from flask_cors import CORS
 from Facturas import Facturas
+from Aprobacion import Aprobacion
 import re
 
 
 
 facturasArr = []
+aprobaciones = []
 fecharesumen1 = []
 fecharesumen2 = []
 
@@ -28,7 +30,10 @@ def rutaPost():
 @app.route('/Facturas', methods=['POST'])
 def cargafacturas():
 
+
     global facturasArr
+
+    facturasArr = []
 
     entrada = request.data.decode('utf-8')
 
@@ -37,7 +42,70 @@ def cargafacturas():
 
     for dte in xmlentrada.findall('DTE'):
         tiempo = dte.find('TIEMPO').text
-        regFecha = re.findall(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", tiempo)
+        #regFecha = re.findall(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", tiempo)
+
+        linea = 1
+        columna = 1
+        centinela = '#'
+        buffer = ''
+        estado = 0
+        fecha = ""
+        aux = ""
+
+        tiempo += centinela
+        i = 0
+        while i < len(tiempo):
+            c = tiempo[i]
+            if estado == 0:
+                if c.isalpha():
+                    columna += 1
+                    estado = 1
+                elif c.isdigit():
+                    buffer += c
+                    columna += 1
+                    estado = 2
+                elif c == '#':
+                    print('Se aceptó la cadena!')
+                    break
+                else:
+                    buffer += c
+                    buffer = ''
+                    columna += 1
+            elif estado == 1:
+                if c.isalpha():
+                    linea += 1
+                    columna = 1
+                elif c == ',':
+                    linea += 1
+                    columna = 1
+                elif c == ' ':
+                    linea += 1
+                    columna = 1
+                    estado = 0
+                else:
+                    columna += 1
+            elif estado == 2:
+                if c.isdigit():
+                    buffer += c
+                    linea += 1
+                    columna = 1
+                elif c == "/":
+                    buffer += c
+                    linea += 1
+                    columna = 1
+                elif c == ' ':
+                    fecha += buffer
+                    buffer = ''
+                    estado = 3
+                else:
+                    pass
+            elif estado == 3:
+                buffer += c
+
+            i += 1
+        #aux = buffer
+        #buffer = ''
+        print(fecha)
 
         referencia = dte.find('REFERENCIA').text
         nitemi = dte.find('NIT_EMISOR').text
@@ -46,7 +114,7 @@ def cargafacturas():
         iva = dte.find('IVA').text
         total = dte.find('TOTAL').text
 
-        nuevo = Facturas(regFecha,referencia,nitemi,nitrec,valor,iva,total, False)
+        nuevo = Facturas(fecha,referencia,nitemi,nitrec,valor,iva,total, False)
 
         facturasArr.append(nuevo)
 
@@ -59,17 +127,8 @@ def getFacturas():
 
 
     global facturasArr
+    global aprobaciones
 
-    contador_facturasrecibidas = 0
-    contador_nitemimalo = 0
-    contador_nitrecmalo = 0
-    contador_ivamalo = 0
-    contador_totalmalo = 0
-    contador_refdoble = 0
-    contador_factbuenas = 0
-    contador_nitemisores = 0
-    contador_nitreceptores = 0
-    contador_facturasmalas = 0
     tiempo1 = ""
     contadorfecha = 1
     coni =  0
@@ -77,24 +136,6 @@ def getFacturas():
     listamalas = []
 
     for factura in facturasArr:
-
-
-        contador_facturasrecibidas += 1
-        print(factura.getTiempo())
-
-        '''
-        if factura.getTiempo() == tiempo1:
-            contadorfecha += 1
-            coni += 1
-            tiempo1 = factura.getTiempo()
-            print("contador ")
-            print(contadorfecha)
-            print(tiempo1)
-        else:
-            coni += 1
-            contadorfecha = 1
-            tiempo1 = factura.getTiempo()
-        '''
 
         #IVA EMISOR MALO
         auxMulti = []
@@ -118,11 +159,11 @@ def getFacturas():
 
         if final == 10:
             if nit_emisor[-1].lower() != "k":
-                contador_nitemimalo += 1
                 factura.setEstadoMalo(True)
+                factura.setListaerrores("error nit emisor")
         elif nit_emisor[-1] != str(final):
-            contador_nitemimalo += 1
             factura.setEstadoMalo(True)
+            factura.setListaerrores("error nit emisor")
 
 
     #IVA NitReceptor MALO
@@ -147,11 +188,13 @@ def getFacturas():
 
     if final1 == 10:
         if nit_receptor[-1].lower() != "k":
-            contador_nitrecmalo += 1
+            factura.setListaerrores("error nit receptor")
             factura.setEstadoMalo(True)
     elif nit_receptor[-1] != str(final1):
-        contador_nitrecmalo += 1
         factura.setEstadoMalo(True)
+        factura.setListaerrores("error nit receptor")
+
+
 
     # referencias DOBLES
     referencias = []
@@ -169,11 +212,10 @@ def getFacturas():
             if c == 0:
                 repetidos.append(ref)
 
-    contador_refdoble += len(repetidos)
-
     for y in repetidos:
         for factura  in facturasArr:
             if factura.getReferencia() == y:
+                factura.setListaerrores("referencia doble")
                 factura.setEstadoMalo(True)
 
     # NIT EMISORES CONTADOR
@@ -183,7 +225,7 @@ def getFacturas():
         if emisores.count(factura.getNitemisor()) == 0:
             emisores.append(factura.getNitemisor())
 
-    contador_nitemisores += len(emisores)
+
 
     # NIT RECEPTOR CONTADOR
 
@@ -192,7 +234,7 @@ def getFacturas():
         if receptores.count(factura.getNitreceptor()) == 0:
             receptores.append(factura.getNitreceptor())
 
-    contador_nitreceptores += len(receptores)
+
 
     for factura in facturasArr:
 
@@ -203,8 +245,8 @@ def getFacturas():
 
         if aprox != operacion:
             factura.setEstadoMalo(True)
-            contador_ivamalo += 1
-            contador_facturasmalas += 1
+            factura.setListaerrores("iva malo")
+
 
 
         #total MALO
@@ -213,16 +255,90 @@ def getFacturas():
         aprox1 = round(totalx, 2)
 
         if aprox1 != operaciontotal:
+            factura.setListaerrores("total malo")
             factura.setEstadoMalo(True)
-            contador_totalmalo += 1
-            contador_facturasmalas += 1
 
 
+    fechas = []
     for factura in facturasArr:
-        if factura.getEstadoMalo() == False:
-            contador_factbuenas += 1
+        if fechas.count(factura.getTiempo()) == 0:
+            fechas.append(factura.getTiempo())
+
+    for fecha in fechas:
+
+        for aprobacion in aprobaciones:
+            if aprobacion.fecha == fecha:
+                contador_facturasrecibidas = aprobacion.contador_facturasrecibidas
+                contador_nitemimalo = aprobacion.concontador_nitemimalo
+                contador_nitrecmalo = aprobacion.contador_nitrecmalo
+                contador_ivamalo = aprobacion.contador_ivamalo
+                contador_totalmalo = aprobacion.contador_totalmalo
+                contador_refdoble = aprobacion.contador_refdoble
+                contador_factbuenas = aprobacion.contador_factbuenas
+                contador_nitemisores = aprobacion.contador_nitemisores
+                contador_nitreceptores = aprobacion.contador_nitreceptores
+                contador_facturasmalas = aprobacion.contador_facturasmalas
+                listaaprobaciones = []
+
+                break
+
+        contador_facturasrecibidas = 0
+        contador_nitemimalo = 0
+        contador_nitrecmalo = 0
+        contador_ivamalo = 0
+        contador_totalmalo = 0
+        contador_refdoble = 0
+        contador_factbuenas = 0
+        contador_nitemisores = 0
+        contador_nitreceptores = 0
+        contador_facturasmalas = 0
+        listaaprobaciones = []
+
+        listacodigoaprobacion = fecha.split("/")
+        codigoaprobacion = listacodigoaprobacion[2] + listacodigoaprobacion[1] + listacodigoaprobacion[0]
+
+        for factura in facturasArr:
+
+            if factura.getTiempo() == fecha:
+                contador_facturasrecibidas += 1
+
+                if factura.getEstadoMalo() == False:
+
+                    contador_factbuenas += 1
+                    correlativo = str(contador_factbuenas)
+                    cantidad = 8 - len(correlativo)
+                    ceros = ""
+                    for i in range(cantidad):
+                        ceros += "0"
+                    codigounico = codigoaprobacion + ceros + correlativo
+                    print(codigounico)
+
+                    facturaaprobada = [factura, codigounico]
+                    listaaprobaciones.append(facturaaprobada)
 
 
+                else:
+                    print(fecha, "mala")
+                    contador_facturasmalas += 1
+                    for error in factura.getLista():
+                        if error == "error nit emisor":
+                            contador_nitemimalo += 1
+                        elif error == "error nit receptor":
+                            contador_nitrecmalo += 1
+                        elif error == "referencia doble":
+                            contador_refdoble += 1
+                        elif error == "iva malo":
+                            contador_ivamalo += 1
+                        elif error == "total malo":
+                            contador_totalmalo += 1
+
+        aprobaciones.append(Aprobacion(fecha,listaaprobaciones,contador_facturasrecibidas,contador_nitemimalo,contador_nitrecmalo, contador_ivamalo, contador_totalmalo, contador_refdoble, contador_factbuenas,contador_nitemisores, contador_nitreceptores, contador_facturasmalas))
+
+
+
+
+
+    '''
     contador_facturasrecibidasformat = "{}".format(contador_facturasrecibidas)
     contador_nitemimaloformat = "{}".format(contador_nitemimalo)
     contador_nitrecmaloformat = "{}".format(contador_nitrecmalo)
@@ -234,10 +350,12 @@ def getFacturas():
     contador_nitreceptoresformat = "{}".format(contador_nitreceptores)
     contador_facturasmalasformat = "{}".format(contador_facturasmalas)
     #contador_factbuenas = contador_facturasrecibidas - contador_facturasmalas
+    '''
 
-
+    '''
     xml = """
 <LISTAAUTORIZACIONES>
+for aprobacion in aprobaciones:
      <AUTORIZACION>
         <FECHA> 01/09/2021 </FECHA>
         <FACTURAS_RECIBIDAS> {contador_facturasrecibidasformat} </FACTURAS_RECIBIDAS>
@@ -260,22 +378,17 @@ def getFacturas():
 <AUTORIZACION>
 </LISTADO_AUTORIZACIONES>
                 """.format(**locals())
+    '''
 
     objeto = {
-            'Facturas recibidas': contador_facturasrecibidas,
-            'Referencia doble':contador_refdoble,
-            'NitEmisor': contador_nitemisores,
-            'NitReceptor': contador_nitreceptores,
-            'IVA malo' : contador_ivamalo,
-            'Total malo' : contador_totalmalo,
-            'Emisor malo' : contador_nitemimalo,
-            'Facturas Buenas' : contador_factbuenas
+            'Aprobaciones': len(aprobaciones),
         }
 
 
     #Datos.append(objeto)
+    frase = "exito"
     xmlsalida = dict2xml(objeto)
-    return (xml)
+    return xmlsalida
 
 
 
@@ -333,22 +446,22 @@ def resumenderangoPost():
 
 @app.route('/resumenrango', methods=['GET'])
 def resumenderangoGet():
-    fechaanalisis1 = ""
 
+    fechaanalisis1 = ""
     for fecha in fecharesumen2:
         fechapass1 = fecha
-
         for factura in facturasArr:
+
             print(fechapass1)
 
             fechaanalisis1 += str(factura.getTiempo())
 
             regFecha = re.search(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", fechaanalisis1)
 
-            print("regex")
-            print(regFecha)
+            print("regex resumen")
+            print(regFecha[0])
 
-            if fechapass1 == regFecha:
+            if fechapass1 == regFecha[0]:
                 objeto = {
                 'Total': factura.getTotal(),
                 'Valor': factura.getValor(),
