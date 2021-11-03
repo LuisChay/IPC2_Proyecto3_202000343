@@ -480,21 +480,11 @@ def resumenderangoPost():
 @app.route('/resumenrango', methods=['GET'])
 def resumenderangoGet():
 
-    fechaanalisis1 = ""
     for fecha in fecharesumen2:
         fechapass1 = fecha
         for factura in facturasArr:
 
-            print(fechapass1)
-
-            fechaanalisis1 += str(factura.getTiempo())
-
-            #regFecha = re.search(r"[\d]{1,2}/[\d]{1,2}/[\d]{4}", fechaanalisis1)
-
-            print("regex resumen")
-            print(regFecha[0])
-
-            if fechapass1 == regFecha[0]:
+            if fechapass1 == str(factura.getTiempo()):
                 objeto = {
                 'Total': factura.getTotal(),
                 'Valor': factura.getValor(),
