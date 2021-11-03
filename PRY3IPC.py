@@ -377,12 +377,10 @@ def getFacturas():
             aprobaciones.append(Aprobacion(fecha,listaaprobaciones,contador_facturasrecibidas,contador_nitemimalo,contador_nitrecmalo, contador_ivamalo, contador_totalmalo, contador_refdoble, contador_factbuenas,contador_nitemisores, contador_nitreceptores, contador_facturasmalas))
 
 
-    xml = """
-<LISTAAUTORIZACIONES>
+    xml = """<LISTAAUTORIZACIONES>
 """
     for aprobacion in aprobaciones:
-        xml += f"""
-     <AUTORIZACION>
+        xml += f""" <AUTORIZACION>
         <FECHA> {aprobacion.fecha} </FECHA>
         <FACTURAS_RECIBIDAS> {aprobacion.contador_facturasrecibidas} </FACTURAS_RECIBIDAS>
         <ERRORES>
@@ -398,19 +396,16 @@ def getFacturas():
         <LISTADO_AUTORIZACIONES>
         """
         for correcta in aprobacion.listaaprobaciones:
-            xml += f'''
-        <APROBACION>
+            xml += f'''<APROBACION>
             <NIT_EMISOR ref="{correcta[0].referencia}"> {correcta[0].nitemisor} </NIT_EMISOR>
             <CODIGO_APROBACION> {correcta[1]} </CODIGO_APROBACION>
         </APROBACION>
         '''
-        xml += f"""
-        <TOTAL_APROBACIONES> {len(listaaprobaciones)} </TOTAL_APROBACIONES>
+        xml += f"""<TOTAL_APROBACIONES> {len(listaaprobaciones)} </TOTAL_APROBACIONES>
         </LISTADO_AUTORIZACIONES>
 </AUTORIZACION>
 """
-        xml += """
-</LISTAAUTORIZACIONES>
+        xml += """</LISTAAUTORIZACIONES>
 """
     autorizaciones = open("autorizaciones.xml", "w")
     autorizaciones.write(xml)
@@ -427,44 +422,6 @@ def getFacturas():
 
 @app.route('/resumeniva', methods=['POST'])
 def resumendeivaPost():
-    global fecharesumen1
-
-    fechapost = request.json['Fecha']
-    fecharesumen1.append(fechapost)
-
-
-    return jsonify({'Mensaje':'Se esta generando el resumen',})
-
-
-@app.route('/resumeniva', methods=['GET'])
-def resumendeivaGet():
-    global facturasArr
-    global fecharesumen1
-
-
-    fechaanalisis1 = ""
-
-    for fecha in fecharesumen1:
-        fechapass = fecha
-
-    for factura in facturasArr:
-        if fechapass == factura.getTiempo():
-            objeto = {
-            'Total': factura.getTotal()
-
-            }
-
-            return(jsonify(objeto))
-
-    salida = { "Mensaje": "No existe registros en esa fecha" }
-
-    return(jsonify(salida))
-
-
-
-@app.route('/resumenrango', methods=['POST'])
-def resumenderangoPost():
-
     global fecharesumen2
 
     fechapost1 = request.json['Fecha']
@@ -474,28 +431,69 @@ def resumenderangoPost():
 
     return jsonify({'Mensaje':'Se esta generando el resumen',})
 
+@app.route('/resumeniva', methods=['GET'])
+def resumendeivaGet():
+    global fecharesumen2
+    fechapass1 = ""
 
-
-
-@app.route('/resumenrango', methods=['GET'])
-def resumenderangoGet():
 
     for fecha in fecharesumen2:
         fechapass1 = fecha
-        for factura in facturasArr:
 
-            if fechapass1 == str(factura.getTiempo()):
+    for aprobacion in aprobaciones:
+        if aprobacion.fecha == fechapass1:
+            nits=[]
+            for correcta in aprobacion.listaaprobaciones:
+                if nits.count(correcta[0].nitemisor) == 0:
+                    nits.append(correcta[0].nitemisor)
+                if nits.count(correcta[0].nitreceptor) == 0:
+                    nits.append(correcta[0].nitreceptor)
+
+        movimientos = []
+        for nit in nits:
+            ivaemi = 0.00
+            ivarec = 0.00
+            for correcta in aprobacion.listaaprobaciones:
+                if correcta[0].nitemisor == nit:
+                    pass
+                    #ivaemi +=
+                if correcta[0].nitreceptor == nit:
+                    #ivarec +=
+                    pass
+
+                #movimientos.append()
+
+
+
                 objeto = {
                 'Total': factura.getTotal(),
                 'Valor': factura.getValor(),
                 'Fecha': factura.getTiempo()
                 }
 
-                return(jsonify(objeto))
+    return(jsonify(objeto))
 
     salida = { "Mensaje": "No existe registros en esa fecha" }
 
     return(jsonify(salida))
+
+
+
+@app.route('/resumenrango', methods=['POST'])
+def resumenderangoPost():
+    print("")
+    return "Lo intente :("
+
+
+
+
+
+
+@app.route('/resumenrango', methods=['GET'])
+def resumenderangoGet():
+    print("")
+    return "Lo intente :("
+
 
 
 if __name__ == "__main__":
