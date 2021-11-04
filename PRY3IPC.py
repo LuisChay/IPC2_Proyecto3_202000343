@@ -449,29 +449,31 @@ def resumendeivaGet():
                 if nits.count(correcta[0].nitreceptor) == 0:
                     nits.append(correcta[0].nitreceptor)
 
-        movimientos = []
-        for nit in nits:
-            ivaemi = 0.00
-            ivarec = 0.00
-            for correcta in aprobacion.listaaprobaciones:
-                if correcta[0].nitemisor == nit:
-                    pass
-                    #ivaemi +=
-                if correcta[0].nitreceptor == nit:
-                    #ivarec +=
-                    pass
+            print(nits)
 
-                #movimientos.append()
-
+            movimientos = []
+            for nit in nits:
+                ivaemi = 0.00
+                ivarec = 0.00
+                for correcta in aprobacion.listaaprobaciones:
+                    if correcta[0].nitemisor == nit:
+                        ivaemi += float(correcta[0].iva)
+                    if correcta[0].nitreceptor == nit:
+                        ivarec += float(correcta[0].iva)
 
 
                 objeto = {
-                'Total': factura.getTotal(),
-                'Valor': factura.getValor(),
-                'Fecha': factura.getTiempo()
+                    'NIT': nit,
+                    'Iva receptor': ivaemi,
+                    'Iva Emisor': ivarec
                 }
 
-    return(jsonify(objeto))
+                movimientos.append(objeto)
+            print(movimientos)
+
+
+
+            return jsonify(movimientos)
 
     salida = { "Mensaje": "No existe registros en esa fecha" }
 
@@ -482,7 +484,7 @@ def resumendeivaGet():
 @app.route('/resumenrango', methods=['POST'])
 def resumenderangoPost():
     print("")
-    return "Lo intente :("
+    return jsonify({'Mensaje':'No pude pero lo intente :(',})
 
 
 
@@ -492,7 +494,7 @@ def resumenderangoPost():
 @app.route('/resumenrango', methods=['GET'])
 def resumenderangoGet():
     print("")
-    return "Lo intente :("
+    return jsonify({'Mensaje':'No pude pero lo intente :(',})
 
 
 
