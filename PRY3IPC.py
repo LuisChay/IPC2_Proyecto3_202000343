@@ -464,8 +464,8 @@ def resumendeivaGet():
 
                 objeto = {
                     'NIT': nit,
-                    'Iva receptor': ivaemi,
-                    'Iva Emisor': ivarec
+                    'Ivareceptor': ivaemi,
+                    'Ivaemisor': ivarec
                 }
 
                 movimientos.append(objeto)
